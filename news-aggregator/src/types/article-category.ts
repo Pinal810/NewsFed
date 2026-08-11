@@ -1,0 +1,12 @@
+export type ArticleCategory =
+  | 'general'
+  | 'business'
+  | 'entertainment'
+  | 'health'
+  | 'science'
+  | 'sports'
+  | 'technology'
+  | 'world'
+  | 'politics'
+  | 'technology'
+  | 'other'
