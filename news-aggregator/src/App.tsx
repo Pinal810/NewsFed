@@ -1,11 +1,13 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 
 function App() {
-
   return (
-    <>
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

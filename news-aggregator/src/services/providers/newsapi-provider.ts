@@ -4,18 +4,12 @@ import type { NewsQuery } from '../../types/news-query'
 import { fetchNewsApiArticles } from '../../api/newsapi'
 import { mapNewsApiToArticles } from '../../adapters/newsapi-adapter'
 
-export class NewsApiProvider implements NewsProvider {
-  readonly providerName = 'newsapi'
-
-  constructor(private apiKey: string) {}
+export const createNewsApiProvider = (apiKey: string): NewsProvider => ({
+  providerName: 'newsapi',
 
   async fetchArticles(query: NewsQuery): Promise<Article[]> {
-    const resp = await fetchNewsApiArticles(this.apiKey, query)
-    return mapNewsApiToArticles(resp)
-  }
+    const resp = await fetchNewsApiArticles(apiKey, query)
 
-  mapToArticle?(raw: unknown) {
-    // optional: adapter can be used directly
-    return undefined as unknown as Article
-  }
-}
+    return mapNewsApiToArticles(resp)
+  },
+})

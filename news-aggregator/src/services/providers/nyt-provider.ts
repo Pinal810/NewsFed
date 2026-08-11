@@ -4,13 +4,11 @@ import type { NewsQuery } from '../../types/news-query'
 import { fetchNytArticles } from '../../api/nyt'
 import { mapNytToArticles } from '../../adapters/nyt-adapter'
 
-export class NewYorkTimesProvider implements NewsProvider {
-  readonly providerName = 'nyt'
-
-  constructor(private apiKey: string) {}
+export const createNewYorkTimesProvider = (apiKey: string): NewsProvider => ({
+  providerName: 'nyt',
 
   async fetchArticles(query: NewsQuery): Promise<Article[]> {
-    const resp = await fetchNytArticles(this.apiKey, query)
+    const resp = await fetchNytArticles(apiKey, query)
     return mapNytToArticles(resp)
-  }
-}
+  },
+})

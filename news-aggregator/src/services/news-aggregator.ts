@@ -1,55 +1,52 @@
 import type { Article } from '../domain/models/article'
 import type { NewsQuery } from '../types/news-query'
 import type { NewsProvider } from './news-provider'
-import { NewsApiProvider } from './providers/newsapi-provider'
-import { GuardianProvider } from './providers/guardian-provider'
-import { NewYorkTimesProvider } from './providers/nyt-provider'
+import { createNewsApiProvider } from './providers/newsapi-provider'
+import { createGuardianProvider } from './providers/guardian-provider'
 
+import { createNewYorkTimesProvider } from './providers/nyt-provider'
 export type AggregatorOptions = {
-  newsApiKey: string
-  guardianKey: string
-  nytKey: string
+    newsApiKey: string
+    guardianKey: string
+    nytKey: string
 }
-
-export class NewsAggregatorService {
-  private providers: NewsProvider[]
-
-  constructor(options: AggregatorOptions) {
-    this.providers = [
-      new NewsApiProvider(options.newsApiKey),
-      new GuardianProvider(options.guardianKey),
-      new NewYorkTimesProvider(options.nytKey),
+export const createNewsAggregatorService = (options: AggregatorOptions,) => {
+    const providers: NewsProvider[] = [
+        createNewsApiProvider(options.newsApiKey),
+        createGuardianProvider(options.guardianKey),
+        createNewYorkTimesProvider(options.nytKey),
     ]
-  }
 
-  async fetchAll(query: NewsQuery): Promise<Article[]> {
-    const settled = await Promise.allSettled(this.providers.map((p) => p.fetchArticles(query)))
+    const fetchAll = async (query: NewsQuery): Promise<Article[]> => {
+        const providersToCall = query.provider
+            ? providers.filter((provider) => provider.providerName === query.provider,)
+            : providers
+        const settled = await Promise.allSettled(providersToCall.map((provider) => provider.fetchArticles(query)),)
+        const articles: Article[] = []
 
-    const articles: Article[] = []
-    for (const r of settled) {
-      if (r.status === 'fulfilled') {
-        articles.push(...r.value)
-      } else {
-        // keep going if one provider fails; optionally log the error
-        // console.error('Provider fetch failed', r.reason)
-      }
+        for (const result of settled) {
+            if (result.status === 'fulfilled') {
+                articles.push(...result.value)
+            }
+        }
+        // Dedupe by URL 
+
+        const articleMap = new Map<string, Article>()
+        for (const article of articles) {
+            if (!articleMap.has(article.url)) {
+                articleMap.set(article.url, article)
+            }
+        }
+
+        // Sort by publishedAt descending
+        return Array.from(articleMap.values()).sort((a, b) => {
+            const ta = Date.parse(a.publishedAt || '') || 0
+            const tb = Date.parse(b.publishedAt || '') || 0
+            return tb - ta
+        })
     }
 
-    // dedupe by URL
-    const map = new Map<string, Article>()
-    for (const a of articles) {
-      if (!map.has(a.url)) map.set(a.url, a)
+    return {
+        fetchAll
     }
-
-    const deduped = Array.from(map.values())
-
-    // sort by publishedAt descending
-    deduped.sort((a, b) => {
-      const ta = Date.parse(a.publishedAt || '') || 0
-      const tb = Date.parse(b.publishedAt || '') || 0
-      return tb - ta
-    })
-
-    return deduped
-  }
 }
