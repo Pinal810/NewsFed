@@ -4,14 +4,15 @@ import type { Article } from '../domain/models/article'
 
 type Props = {
   articles: Article[]
+  detailUrlBuilder?: (article: Article) => string
 }
 
-export const ArticleGrid: React.FC<Props> = ({ articles }) => {
+export const ArticleGrid: React.FC<Props> = ({ articles, detailUrlBuilder }) => {
   return (
     <section aria-live="polite" style={{ padding: 16 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
         {articles.map((a) => (
-          <ArticleCard key={a.id} article={a} />
+          <ArticleCard key={a.id} article={a} detailUrl={detailUrlBuilder?.(a)} />
         ))}
       </div>
     </section>

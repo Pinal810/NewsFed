@@ -9,37 +9,44 @@ type State = {
   error?: string
 }
 
-export function useNews(initialQuery: Partial<NewsQuery> = {}) {
-  const [query, setQuery] = useState<NewsQuery>({ ...initialQuery })
+function sortArticles(articles: Article[], sort?: 'latest' | 'oldest') {
+  return [...articles].sort((a, b) => {
+    const ta = Date.parse(a.publishedAt || '') || 0
+    const tb = Date.parse(b.publishedAt || '') || 0
+    return sort === 'oldest' ? ta - tb : tb - ta
+  })
+}
+
+export function useNews(query: NewsQuery) {
   const [state, setState] = useState<State>({ articles: [], loading: false })
 
   const service = useMemo(() => {
     const newsApiKey = import.meta.env.VITE_NEWSAPI_KEY ?? ''
+    console.log("🚀 ~ useNews ~ newsApiKey:", newsApiKey)
     const guardianKey = import.meta.env.VITE_GUARDIAN_KEY ?? ''
     const nytKey = import.meta.env.VITE_NYT_KEY ?? ''
-    return createNewsAggregatorService({ newsApiKey, guardianKey, nytKey, })
+    return createNewsAggregatorService({ newsApiKey, guardianKey, nytKey })
   }, [])
 
   const fetch = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: undefined }))
+    setState((current) => ({ ...current, loading: true, error: undefined }))
     try {
-      const articles = await service.fetchAll(query)
-      setState({ articles, loading: false })
+      const fetched = await service.fetchAll(query)
+      setState({ articles: sortArticles(fetched, query.sort), loading: false })
     } catch (err) {
       setState({ articles: [], loading: false, error: (err as Error).message ?? String(err) })
     }
   }, [query, service])
 
   useEffect(() => {
-    fetch()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetch()
   }, [fetch])
 
   return {
     articles: state.articles,
     loading: state.loading,
     error: state.error,
-    setQuery,
-    query,
     refresh: fetch,
   }
 }

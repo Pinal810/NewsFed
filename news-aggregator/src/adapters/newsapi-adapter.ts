@@ -1,6 +1,5 @@
 import type { NewsApiResponse } from '../api/newsapi.types'
 import type { Article } from '../domain/models/article'
-import { AVAILABLE_PROVIDERS } from '../config/providers'
 
 export function mapNewsApiToArticles(resp: NewsApiResponse): Article[] {
   return resp.articles.map((a) => ({

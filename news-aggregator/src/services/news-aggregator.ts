@@ -29,7 +29,6 @@ export const createNewsAggregatorService = (options: AggregatorOptions,) => {
                 articles.push(...result.value)
             }
         }
-        // Dedupe by URL 
 
         const articleMap = new Map<string, Article>()
         for (const article of articles) {
@@ -38,10 +37,13 @@ export const createNewsAggregatorService = (options: AggregatorOptions,) => {
             }
         }
 
-        // Sort by publishedAt descending
-        return Array.from(articleMap.values()).sort((a, b) => {
+        const sorted = Array.from(articleMap.values())
+        return sorted.sort((a, b) => {
             const ta = Date.parse(a.publishedAt || '') || 0
             const tb = Date.parse(b.publishedAt || '') || 0
+            if (query.sort === 'oldest') {
+                return ta - tb
+            }
             return tb - ta
         })
     }
