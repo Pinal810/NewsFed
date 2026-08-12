@@ -7,9 +7,11 @@ import type { NewsProviderName } from '../types/news-provider-name'
  * Implementations should adapt provider-specific responses to `Article`.
  */
 export interface NewsProvider {
-  readonly providerName: NewsProviderName
+  readonly name: NewsProviderName
+  readonly providerName?: NewsProviderName
 
-  fetchArticles(query: NewsQuery): Promise<Article[]>
+  searchArticles(query: NewsQuery, signal?: AbortSignal): Promise<Article[]>
+  fetchArticles?(query: NewsQuery, signal?: AbortSignal): Promise<Article[]>
 
   /**
    * Optional helper to map a raw provider item to the common `Article`.

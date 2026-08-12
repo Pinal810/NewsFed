@@ -5,11 +5,15 @@ import { fetchNewsApiArticles } from '../../api/newsapi'
 import { mapNewsApiToArticles } from '../../adapters/newsapi-adapter'
 
 export const createNewsApiProvider = (apiKey: string): NewsProvider => ({
+  name: 'newsapi',
   providerName: 'newsapi',
 
-  async fetchArticles(query: NewsQuery): Promise<Article[]> {
-    const resp = await fetchNewsApiArticles(apiKey, query)
-
+  async searchArticles(query: NewsQuery, signal?: AbortSignal): Promise<Article[]> {
+    const resp = await fetchNewsApiArticles(apiKey, query, signal)
     return mapNewsApiToArticles(resp)
+  },
+
+  fetchArticles(query: NewsQuery, signal?: AbortSignal): Promise<Article[]> {
+    return this.searchArticles(query, signal)
   },
 })

@@ -5,11 +5,15 @@ import { fetchGuardianArticles } from '../../api/guardian'
 import { mapGuardianToArticles } from '../../adapters/guardian-adapter'
 
 export const createGuardianProvider = (apiKey: string): NewsProvider => ({
+  name: 'theguardian',
   providerName: 'theguardian',
 
-  async fetchArticles(query: NewsQuery): Promise<Article[]> {
-    const resp = await fetchGuardianArticles(apiKey, query)
-
+  async searchArticles(query: NewsQuery, signal?: AbortSignal): Promise<Article[]> {
+    const resp = await fetchGuardianArticles(apiKey, query, signal)
     return mapGuardianToArticles(resp)
+  },
+
+  fetchArticles(query: NewsQuery, signal?: AbortSignal): Promise<Article[]> {
+    return this.searchArticles(query, signal)
   },
 })

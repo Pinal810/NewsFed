@@ -1,10 +1,121 @@
 import { useMemo } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import type { NewsQuery } from '../types/news-query'
 import type { ArticleCategory } from '../types/article-category'
-import type { NewsProviderName } from '../types/news-provider-name'
+import {
+  DEFAULT_ARTICLE_SORT,
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  normalizeSourceValue,
+  providerNameFromSource,
+  serializeSourceValue,
+  type ArticleSort,
+  type NewsQuery,
+} from '../types/news-query'
 
-const DEFAULT_PAGE_SIZE = 12
+const VALID_CATEGORIES = new Set<ArticleCategory>(['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology', 'world', 'politics', 'other'])
+const VALID_SORTS = new Set<ArticleSort>(['newest', 'oldest', 'relevance'])
+
+function trimToUndefined(value: string | null | undefined): string | undefined {
+  if (value == null) return undefined
+  const trimmed = value.trim()
+  return trimmed ? trimmed : undefined
+}
+
+function parsePositiveInteger(value: string | null | undefined, fallback: number): number {
+  if (value == null) return fallback
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback
+}
+
+function parseDate(value: string | null | undefined): string | undefined {
+  const trimmed = trimToUndefined(value)
+  if (!trimmed) return undefined
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return undefined
+  return trimmed
+}
+
+function parseCategory(value: string | null | undefined): ArticleCategory | undefined {
+  const normalized = trimToUndefined(value)
+  if (!normalized) return undefined
+  return VALID_CATEGORIES.has(normalized as ArticleCategory) ? (normalized as ArticleCategory) : undefined
+}
+
+export function parseArticleListQuery(searchParams: URLSearchParams): NewsQuery {
+  const q = trimToUndefined(searchParams.get('q'))
+  const category = parseCategory(searchParams.get('category'))
+  const source = normalizeSourceValue(searchParams.get('source') ?? undefined)
+  const author = trimToUndefined(searchParams.get('author'))
+  const from = parseDate(searchParams.get('from'))
+  const to = parseDate(searchParams.get('to'))
+  const sortParam = trimToUndefined(searchParams.get('sort'))?.toLowerCase()
+  const sort = sortParam && VALID_SORTS.has(sortParam as ArticleSort) ? (sortParam as ArticleSort) : DEFAULT_ARTICLE_SORT
+  const page = parsePositiveInteger(searchParams.get('page'), DEFAULT_PAGE)
+  const pageSize = parsePositiveInteger(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE)
+
+  const query: NewsQuery = {
+    q,
+    category,
+    source,
+    author,
+    from,
+    to,
+    sort,
+    page,
+    pageSize,
+  }
+
+  if (query.category === undefined && searchParams.get('category')) {
+    query.category = undefined
+  }
+
+  return query
+}
+
+export function serializeArticleListQuery(query: Partial<NewsQuery> = {}): URLSearchParams {
+  const params = new URLSearchParams()
+
+  if (query.q) {
+    params.set('q', query.q.trim())
+  }
+
+  if (query.category) {
+    params.set('category', query.category)
+  }
+
+  if (query.source) {
+    const sourceValue = serializeSourceValue(query.source)
+    if (sourceValue) params.set('source', sourceValue)
+  }
+
+  if (query.author) {
+    params.set('author', query.author.trim())
+  }
+
+  if (query.from) {
+    params.set('from', query.from)
+  }
+
+  if (query.to) {
+    params.set('to', query.to)
+  }
+
+  if (query.sort && query.sort !== DEFAULT_ARTICLE_SORT) {
+    params.set('sort', query.sort)
+  } else if (query.sort) {
+    params.set('sort', DEFAULT_ARTICLE_SORT)
+  }
+
+  if (query.page && query.page > 1) {
+    params.set('page', String(query.page))
+  }
+
+  if (query.pageSize && query.pageSize !== DEFAULT_PAGE_SIZE) {
+    params.set('pageSize', String(query.pageSize))
+  }
+
+  params.sort()
+  return params
+}
 
 export function useArticleListQuery() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -13,59 +124,46 @@ export function useArticleListQuery() {
   const params = useParams<{ category?: ArticleCategory }>()
 
   const query = useMemo<NewsQuery>(() => {
-    const q = searchParams.get('q') ?? undefined
-    const provider = (searchParams.get('provider') as NewsProviderName) || undefined
-    const sort = (searchParams.get('sort') as NewsQuery['sort']) || 'latest'
-    const page = Number(searchParams.get('page') ?? 1)
-    const pageSize = Number(searchParams.get('pageSize') ?? DEFAULT_PAGE_SIZE)
-
+    const parsed = parseArticleListQuery(searchParams)
+    const category = params.category ? parseCategory(params.category) ?? parsed.category : parsed.category
     return {
-      q,
-      provider,
-      category: params.category,
-      sort,
-      page: Number.isNaN(page) || page < 1 ? 1 : page,
-      pageSize: Number.isNaN(pageSize) || pageSize < 1 ? DEFAULT_PAGE_SIZE : pageSize,
+      ...parsed,
+      category,
+      provider: providerNameFromSource(parsed.source),
     }
   }, [params.category, searchParams])
 
   const setQuery = (partial: Partial<NewsQuery>) => {
-    const nextParams = new URLSearchParams(searchParams)
-
-    if (partial.q !== undefined) {
-      if (partial.q) nextParams.set('q', partial.q)
-      else nextParams.delete('q')
+    const nextQuery: NewsQuery = {
+      ...query,
+      ...partial,
     }
 
-    if (partial.provider !== undefined) {
-      if (partial.provider) nextParams.set('provider', partial.provider)
-      else nextParams.delete('provider')
-    }
+    const nextParams = serializeArticleListQuery(nextQuery)
 
-    if (partial.sort !== undefined) {
-      if (partial.sort === 'latest') nextParams.delete('sort')
-      else nextParams.set('sort', partial.sort)
-    }
+    const nextCategory = partial.category ?? query.category
+    if (partial.category !== undefined || (partial.category === undefined && location.pathname.startsWith('/category/'))) {
+      if (nextCategory) {
+        navigate(`/category/${nextCategory}${nextParams.size > 0 ? `?${nextParams.toString()}` : ''}`, { replace: true })
+        return
+      }
 
-    if (partial.page !== undefined) {
-      if (partial.page === 1) nextParams.delete('page')
-      else nextParams.set('page', String(partial.page))
-    }
-
-    if (partial.pageSize !== undefined) {
-      if (partial.pageSize === DEFAULT_PAGE_SIZE) nextParams.delete('pageSize')
-      else nextParams.set('pageSize', String(partial.pageSize))
+      const newPath = location.pathname === '/search' ? '/search' : '/'
+      navigate(`${newPath}${nextParams.size > 0 ? `?${nextParams.toString()}` : ''}`, { replace: true })
+      return
     }
 
     setSearchParams(nextParams, { replace: true })
   }
 
   const navigateToCategory = (category?: ArticleCategory) => {
+    const nextParams = serializeArticleListQuery({ ...query, category })
     if (category) {
-      navigate(`/category/${category}${location.search}`)
-    } else {
-      navigate(`/${location.search}`)
+      navigate(`/category/${category}${nextParams.size > 0 ? `?${nextParams.toString()}` : ''}`, { replace: true })
+      return
     }
+
+    navigate(`/${nextParams.size > 0 ? `?${nextParams.toString()}` : ''}`, { replace: true })
   }
 
   return { query, setQuery, navigateToCategory, location }

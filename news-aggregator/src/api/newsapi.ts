@@ -3,64 +3,48 @@ import type { NewsApiResponse } from './newsapi.types'
 import { createAxiosInstance } from './axios'
 
 export async function fetchNewsApiArticles(
-    apiKey: string,
-    query: NewsQuery
+  apiKey: string,
+  query: NewsQuery,
+  signal?: AbortSignal,
 ): Promise<NewsApiResponse> {
-    const baseURL =
-        import.meta.env.VITE_NEWSAPI_BASE_URL ?? 'https://newsapi.org/v2'
+  const baseURL = import.meta.env.VITE_NEWSAPI_BASE_URL ?? 'https://newsapi.org/v2'
 
-    const client = createAxiosInstance({
-        baseURL,
-    })
+  const client = createAxiosInstance({ baseURL })
+  const params: Record<string, string | number> = {}
 
-    const params: Record<string, string | number> = {}
+  client.defaults.headers.common['X-Api-Key'] = apiKey
 
-    // NewsAPI.org authentication
-    client.defaults.headers.common['X-Api-Key'] = apiKey
+  const searchTerms = [query.q, query.author].filter(Boolean).join(' ')
+  if (searchTerms) {
+    params.q = searchTerms
+  }
 
-    // Search query
-    if (query.category) {
-        params.q = query.category
-    }
+  if (query.category) {
+    params.q = query.q ? `${query.q} ${query.category}` : query.category
+  }
 
-    // Search words in title
-    if (query.qInTitle || query.q) {
-        params.qInTitle = query.qInTitle || query.q || ''
-    }
+  if (query.qInTitle || query.q) {
+    params.qInTitle = query.qInTitle || query.q || ''
+  }
 
-    // Sources
-    const sourcesValue = query.sources ?? query.sourceId
+  const sourceValue = query.sources ?? query.sourceId ?? query.source
+  if (sourceValue) {
+    params.sources = sourceValue
+  }
 
-    if (sourcesValue) {
-        params.sources = sourcesValue
-    }
+  if (query.domains) {
+    params.domains = query.domains
+  }
 
-    // Domains
-    if (query.domains) {
-        params.domains = query.domains
-    }
+  if (query.from) params.from = query.from
+  if (query.to) params.to = query.to
+  if (query.page) params.page = query.page
+  if (query.pageSize) params.pageSize = query.pageSize
 
-    // Date range
-    if (query.from) {
-        params.from = query.from
-    }
+  const res = await client.get<NewsApiResponse>('/everything', {
+    params,
+    signal,
+  })
 
-    if (query.to) {
-        params.to = query.to
-    }
-
-    // Pagination
-    if (query.page) {
-        params.page = query.page
-    }
-
-    if (query.pageSize) {
-        params.pageSize = query.pageSize
-    }
-
-    const res = await client.get<NewsApiResponse>('/everything', {
-        params,
-    })
-
-    return res.data
+  return res.data
 }

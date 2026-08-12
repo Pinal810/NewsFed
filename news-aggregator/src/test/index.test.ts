@@ -1,7 +1,36 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import type { Article } from '../domain/models/article'
+import { deduplicateArticles } from '../services/news-aggregator'
 
-describe('sanity', () => {
-  it('works', () => {
-    expect(true).toBe(true)
+describe('aggregator helpers', () => {
+  it('deduplicates articles by canonical URL and then provider id and title', () => {
+    const articles: Article[] = [
+      {
+        id: 'a-1',
+        title: 'AI Breakthrough',
+        url: 'https://example.com/news?utm=1',
+        publishedAt: '2026-08-12T00:00:00.000Z',
+        source: { id: 'example', name: 'Example', provider: 'newsapi' },
+        provider: 'newsapi',
+      },
+      {
+        id: 'b-2',
+        title: 'AI Breakthrough',
+        url: 'https://example.com/news',
+        publishedAt: '2026-08-12T01:00:00.000Z',
+        source: { id: 'other', name: 'Other', provider: 'theguardian' },
+        provider: 'theguardian',
+      },
+      {
+        id: 'c-3',
+        title: 'Different Headline',
+        url: 'https://example.org/other',
+        publishedAt: '2026-08-13T00:00:00.000Z',
+        source: { id: 'example', name: 'Example', provider: 'nyt' },
+        provider: 'nyt',
+      },
+    ]
+
+    expect(deduplicateArticles(articles)).toHaveLength(2)
   })
 })
