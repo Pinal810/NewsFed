@@ -36,52 +36,58 @@ export const PreferencesPanel: React.FC<Props> = ({ preferences, availableAuthor
   }
 
   return (
-    <section style={{ border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
-        <h3 style={{ margin: 0 }}>Personalized feed</h3>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" onClick={handleSave} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--accent)', color: '#fff' }}>
+    <section className="preferences-panel" aria-label="Article personalization settings">
+      <div className="preferences-panel__header">
+        <h3 className="preferences-panel__title">Personalized feed</h3>
+        <div className="preferences-panel__buttons">
+          <button type="button" className="action-button" onClick={handleSave}>
             Save preferences
           </button>
-          <button type="button" onClick={handleReset} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: '#fff', color: 'var(--text)' }}>
+          <button type="button" className="secondary-button" onClick={handleReset}>
             Reset
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 18 }}>
-        <div>
-          <h4 style={{ margin: '0 0 10px' }}>Sources</h4>
-          {AVAILABLE_SOURCES.map((source) => (
-            <label key={source} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <input type="checkbox" checked={draft.sources.includes(source)} onChange={() => toggleValue('sources', source)} />
-              <span>{source === 'guardian' ? 'Guardian' : source === 'newsapi' ? 'NewsAPI' : 'NYT'}</span>
-            </label>
-          ))}
-        </div>
-
-        <div>
-          <h4 style={{ margin: '0 0 10px' }}>Categories</h4>
-          {ALL_CATEGORIES.map((category) => (
-            <label key={category} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <input type="checkbox" checked={draft.categories.includes(category)} onChange={() => toggleValue('categories', category)} />
-              <span>{category}</span>
-            </label>
-          ))}
-        </div>
-
-        <div>
-          <h4 style={{ margin: '0 0 10px' }}>Authors</h4>
-          {authorOptions.length === 0 ? (
-            <p style={{ color: 'var(--text)', margin: 0 }}>No authors available yet.</p>
-          ) : (
-            authorOptions.map((author) => (
-              <label key={author} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <input type="checkbox" checked={draft.authors.includes(author)} onChange={() => toggleValue('authors', author)} />
-                <span>{author}</span>
+      <div className="preferences-grid">
+        <div className="preference-group">
+          <h4>Sources</h4>
+          <div className="preference-list">
+            {AVAILABLE_SOURCES.map((source) => (
+              <label key={source} className="preference-option">
+                <input type="checkbox" checked={draft.sources.includes(source)} onChange={() => toggleValue('sources', source)} />
+                <span>{source === 'guardian' ? 'Guardian' : source === 'newsapi' ? 'NewsAPI' : 'NYT'}</span>
               </label>
-            ))
-          )}
+            ))}
+          </div>
+        </div>
+
+        <div className="preference-group">
+          <h4>Categories</h4>
+          <div className="preference-list">
+            {ALL_CATEGORIES.map((category) => (
+              <label key={category} className="preference-option">
+                <input type="checkbox" checked={draft.categories.includes(category)} onChange={() => toggleValue('categories', category)} />
+                <span>{category}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="preference-group">
+          <h4>Authors</h4>
+          <div className="preference-list">
+            {authorOptions.length === 0 ? (
+              <p>No authors available yet.</p>
+            ) : (
+              authorOptions.map((author) => (
+                <label key={author} className="preference-option">
+                  <input type="checkbox" checked={draft.authors.includes(author)} onChange={() => toggleValue('authors', author)} />
+                  <span>{author}</span>
+                </label>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </section>

@@ -3,8 +3,9 @@ import React from 'react'
 type Props = { message?: string }
 
 export const EmptyState: React.FC<Props> = ({ message = 'No articles found.' }) => (
-  <div style={{ padding: 32, textAlign: 'center' }}>
-    <div style={{ fontSize: 18, marginBottom: 8 }}>{message}</div>
+  <div className="empty-state" aria-live="polite">
+    <div className="empty-state__title">No results</div>
+    <div className="empty-state__body">{message}</div>
   </div>
 )
 

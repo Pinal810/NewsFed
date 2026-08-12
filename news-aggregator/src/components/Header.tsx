@@ -7,12 +7,15 @@ type Props = {
 
 export const Header: React.FC<Props> = ({ title = 'News Aggregator' }) => {
   return (
-    <header style={{ padding: '20px 16px', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ maxWidth: 1126, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <h1>{title}</h1>
-        <nav aria-label="Main navigation" style={{ display: 'flex', gap: 12 }}>
-          <Link to="/" style={{ color: 'var(--text)' }}>Home</Link>
-          <Link to="/search" style={{ color: 'var(--text)' }}>Search</Link>
+    <header className="site-header">
+      <div className="site-header__inner">
+        <div className="site-header__brand">
+          <span className="site-header__eyebrow">Daily Brief</span>
+          <h1>{title}</h1>
+        </div>
+        <nav aria-label="Main navigation" className="site-nav">
+          <Link to="/">Home</Link>
+          <Link to="/search">Search</Link>
         </nav>
       </div>
     </header>

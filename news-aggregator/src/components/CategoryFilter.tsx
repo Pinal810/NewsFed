@@ -9,15 +9,17 @@ type Props = {
 const CATEGORIES: ArticleCategory[] = ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology', 'world', 'politics', 'other']
 
 export const CategoryFilter: React.FC<Props> = ({ value, onChange }) => (
-  <div>
-    <label htmlFor="category-select" style={{ marginRight: 8 }}>Category</label>
-    <select id="category-select" value={value ?? ''} onChange={(e) => onChange((e.target.value as ArticleCategory) || undefined)}>
+  <label className="field" htmlFor="category-select">
+    <span className="field__label">Category</span>
+    <select id="category-select" className="field__select" value={value ?? ''} onChange={(e) => onChange((e.target.value as ArticleCategory) || undefined)}>
       <option value="">All</option>
-      {CATEGORIES.map((c) => (
-        <option key={c} value={c}>{c}</option>
+      {CATEGORIES.map((category) => (
+        <option key={category} value={category}>
+          {category}
+        </option>
       ))}
     </select>
-  </div>
+  </label>
 )
 
 export default CategoryFilter

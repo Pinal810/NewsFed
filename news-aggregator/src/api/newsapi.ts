@@ -27,10 +27,10 @@ export async function fetchNewsApiArticles(
     params.qInTitle = query.qInTitle || query.q || ''
   }
 
-  const sourceValue = query.sources ?? query.sourceId ?? query.source
-  if (sourceValue) {
-    params.sources = sourceValue
-  }
+//   const sourceValue = query.sources ?? query.sourceId ?? query.source
+//   if (sourceValue) {
+//     params.sources = sourceValue
+//   }
 
   if (query.domains) {
     params.domains = query.domains

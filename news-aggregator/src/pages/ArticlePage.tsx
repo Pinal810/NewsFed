@@ -1,57 +1,120 @@
 import React from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Header } from '../components/Header'
-import type { Article } from '../domain/models/article'
+import { buildArticleIdentifier, normalizeArticleUrl, parseArticleIdentifier, type Article } from '../domain/models/article'
+import { getCachedArticleById, readArticleCache } from '../services/article-cache'
+
+const formatDate = (rawDate?: string) => {
+  if (!rawDate) {
+    return 'Date unavailable'
+  }
+
+  const date = new Date(rawDate)
+  if (Number.isNaN(date.getTime())) {
+    return 'Date unavailable'
+  }
+
+  return new Intl.DateTimeFormat('en', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  }).format(date)
+}
+
+function resolveArticleFromRoute(routeId: string | undefined, navigationState?: { article?: Article }): Article | undefined {
+  if (!routeId) return navigationState?.article
+
+  const decoded = decodeURIComponent(routeId)
+  const parsed = parseArticleIdentifier(decoded)
+
+  if (navigationState?.article) {
+    const matchingArticle = buildArticleIdentifier(navigationState.article)
+    if (matchingArticle === decoded || normalizeArticleUrl(navigationState.article.url) === normalizeArticleUrl(parsed.url ?? '')) {
+      return navigationState.article
+    }
+  }
+
+  const cached = getCachedArticleById(decoded)
+  if (cached) {
+    return cached
+  }
+
+  const articleByUrl = Object.values(readArticleCache()).find((article) => {
+    const articleId = buildArticleIdentifier(article)
+    return articleId === decoded || normalizeArticleUrl(article.url) === normalizeArticleUrl(parsed.url ?? '')
+  })
+
+  return articleByUrl
+}
 
 export const ArticlePage: React.FC = () => {
+  const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
-  const article = location.state?.article as Article | undefined
+  const article = resolveArticleFromRoute(id, location.state as { article?: Article } | undefined)
 
   if (!article) {
     return (
       <div>
         <Header />
-        <main style={{ maxWidth: 1126, margin: '20px auto', padding: '0 16px' }}>
-          <div style={{ padding: 32, textAlign: 'center' }}>
-            <h2>Article not found</h2>
-            <p>Open an article from the list to view details.</p>
-            <button style={{ padding: '10px 18px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: '#fff' }} onClick={() => navigate(-1)}>
-              Go back
-            </button>
+        <main className="detail-shell">
+          <div className="not-found-state">
+            <h2 className="not-found-state__title">Article not found</h2>
+            <p className="not-found-state__body">This article is unavailable or the link is outdated.</p>
+            <div style={{ marginTop: 20 }}>
+              <button type="button" className="action-button" onClick={() => navigate(-1)}>
+                Go back
+              </button>
+            </div>
           </div>
         </main>
       </div>
     )
   }
 
+  const description = article.description?.trim() || article.content?.trim() || 'No additional description available.'
+  const sourceName = article.source?.name?.trim() || article.source?.id || 'Source'
+  const category = article.category ? article.category : undefined
+
   return (
     <div>
       <Header />
-      <main style={{ maxWidth: 860, margin: '20px auto', padding: '0 16px' }}>
-        <article>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 14, color: 'var(--text)' }}>{article.source.name}</div>
-            <h1 style={{ margin: '12px 0' }}>{article.title}</h1>
-            <div style={{ display: 'flex', gap: 12, color: 'var(--text)', fontSize: 14 }}>
-              {article.author && <span>{article.author}</span>}
-              <time dateTime={article.publishedAt}>{new Date(article.publishedAt).toLocaleString()}</time>
-            </div>
+      <main className="detail-shell">
+        <article className="detail-article">
+          <div className="detail-article__media">
+            {article.imageUrl ? (
+              <img src={article.imageUrl} alt={article.title ? `Image for ${article.title}` : 'Story image'} loading="lazy" />
+            ) : (
+              <div className="detail-article__placeholder">Image unavailable</div>
+            )}
           </div>
 
-          {article.imageUrl ? (
-            <img src={article.imageUrl} alt={article.title} style={{ width: '100%', borderRadius: 12, objectFit: 'cover', maxHeight: 420 }} />
-          ) : (
-            <div style={{ width: '100%', height: 260, borderRadius: 12, background: '#f3f3f3', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text)' }}>
-              No image available
+          <div className="detail-article__content">
+            <div className="detail-article__meta">
+              <span className="detail-article__source">{sourceName}</span>
+              {category ? <span>{category}</span> : null}
+              <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
             </div>
-          )}
 
-          <div style={{ padding: '24px 0' }}>
-            <p style={{ lineHeight: 1.75, color: 'var(--text)' }}>{article.description ?? article.content ?? 'No additional description available.'}</p>
-            <a href={article.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 20, color: 'var(--accent)' }}>
-              Read original article
-            </a>
+            <h1 className="detail-article__title">{article.title}</h1>
+
+            <div className="detail-article__meta" style={{ marginBottom: 0 }}>
+              {article.author ? <span>{article.author}</span> : null}
+            </div>
+
+            <div className="detail-article__body">
+              <p>{description}</p>
+            </div>
+
+            <div className="detail-actions">
+              <Link className="secondary-button" to="/" style={{ width: 'auto' }}>
+                Back to news
+              </Link>
+              {article.url ? (
+                <a className="read-original" href={article.url} target="_blank" rel="noopener noreferrer">
+                  Read full article
+                </a>
+              ) : null}
+            </div>
           </div>
         </article>
       </main>

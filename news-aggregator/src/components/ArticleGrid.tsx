@@ -9,12 +9,10 @@ type Props = {
 
 export const ArticleGrid: React.FC<Props> = ({ articles, detailUrlBuilder }) => {
   return (
-    <section aria-live="polite" style={{ padding: 16 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-        {articles.map((a) => (
-          <ArticleCard key={a.id} article={a} detailUrl={detailUrlBuilder?.(a)} />
-        ))}
-      </div>
+    <section aria-live="polite" aria-label="News article results" className="article-grid">
+      {articles.map((article) => (
+        <ArticleCard key={article.id} article={article} detailUrl={detailUrlBuilder?.(article)} />
+      ))}
     </section>
   )
 }

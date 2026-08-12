@@ -10,8 +10,8 @@ export async function fetchGuardianArticles(apiKey: string, query: NewsQuery, si
   if (combinedQuery) params.q = combinedQuery
   if (query.page) params.page = query.page
   if (query.pageSize) params['page-size'] = query.pageSize ?? 20
-  if (query.from) params.from = query.from
-  if (query.to) params.to = query.to
+  if (query.from) params['from-date'] = query.from
+  if (query.to) params['to-date'] = query.to
 
   const res = await client.get<GuardianResponse>('/search', { params, signal })
   return res.data

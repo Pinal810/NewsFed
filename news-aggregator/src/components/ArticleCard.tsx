@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import type { Article } from '../domain/models/article'
 
 type Props = {
@@ -6,35 +7,73 @@ type Props = {
   detailUrl?: string
 }
 
+const fallbackImageText = 'Image unavailable'
+
+const formatArticleDate = (rawDate?: string) => {
+  if (!rawDate) {
+    return 'Date unavailable'
+  }
+
+  const date = new Date(rawDate)
+  if (Number.isNaN(date.getTime())) {
+    return 'Date unavailable'
+  }
+
+  return new Intl.DateTimeFormat('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+}
+
 export const ArticleCard: React.FC<Props> = ({ article, detailUrl }) => {
+  const [imageError, setImageError] = React.useState(false)
+
+  const description = article.description?.trim() || article.content?.trim() || 'No description available.'
+  const category = article.category?.trim() || undefined
+  const sourceName = article.source?.name?.trim() || article.source?.id || 'Source'
+  const authorName = article.author?.trim() || 'Unknown author'
+  const imageAltText = article.title ? `Image for ${article.title}` : 'Story illustration'
+
   return (
-    <article style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', textAlign: 'left', background: 'var(--bg)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ flex: '1 1 auto' }}>
-        <div style={{ width: '100%', height: 160, background: '#f3f3f3', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {article.imageUrl ? (
-            <img src={article.imageUrl} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          ) : (
-            <div style={{ padding: 16, color: 'var(--text)' }}>No image</div>
-          )}
-        </div>
-        <div style={{ padding: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--text)', marginBottom: 6 }}>{article.source.name}</div>
-          <h3 style={{ margin: '0 0 8px', color: 'var(--text-h)' }}>{article.title}</h3>
-          <p style={{ margin: 0, color: 'var(--text)', minHeight: 48 }}>{article.description ?? article.content ?? 'No description available.'}</p>
-        </div>
+    <article className="article-card" aria-label={article.title}>
+      <div className="article-card__media">
+        {article.imageUrl && !imageError ? (
+          <img
+            className="article-card__image"
+            src={article.imageUrl}
+            alt={imageAltText}
+            loading="lazy"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="article-card__placeholder">{fallbackImageText}</div>
+        )}
       </div>
-      <div style={{ borderTop: '1px solid var(--border)', padding: 12, display: 'grid', gap: 10 }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', color: 'var(--text)', fontSize: 12 }}>
-          {article.author && <span>{article.author}</span>}
-          <time dateTime={article.publishedAt}>{new Date(article.publishedAt).toLocaleString()}</time>
+
+      <div className="article-card__body">
+        <div className="article-card__meta">
+          <span className="article-card__source">{sourceName}</span>
+          {category ? <span>{category}</span> : null}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+
+        <h3 className="article-card__title">{article.title}</h3>
+        <p className="article-card__description">{description}</p>
+      </div>
+
+      <div className="article-card__footer">
+        <div className="article-card__details">
+          {authorName ? <span>{authorName}</span> : null}
+          <time dateTime={article.publishedAt}>{formatArticleDate(article.publishedAt)}</time>
+        </div>
+
+        <div className="article-card__actions">
           {detailUrl ? (
-            <a href={detailUrl} style={{ flex: '1 1 auto', padding: '8px 12px', borderRadius: 8, textAlign: 'center', background: '#f3f3f3', color: 'var(--text)', textDecoration: 'none' }}>
+            <Link className="inline-link" to={detailUrl} state={{ article }}>
               View details
-            </a>
+            </Link>
           ) : null}
-          <a href={article.url} target="_blank" rel="noopener noreferrer" style={{ flex: '1 1 auto', padding: '8px 12px', borderRadius: 8, textAlign: 'center', background: 'var(--accent)', color: '#fff', textDecoration: 'none' }}>
+          <a className="read-original" href={article.url} target="_blank" rel="noopener noreferrer">
             Read original
           </a>
         </div>

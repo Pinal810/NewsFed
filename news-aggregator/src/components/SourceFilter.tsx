@@ -6,15 +6,17 @@ type Props = { value?: NewsSourceFilterValue; onChange: (v?: NewsSourceFilterVal
 const SOURCES: NewsSourceFilterValue[] = ['newsapi', 'guardian', 'nyt']
 
 export const SourceFilter: React.FC<Props> = ({ value, onChange }) => (
-  <div>
-    <label htmlFor="source-select" style={{ marginRight: 8 }}>Source</label>
-    <select id="source-select" value={value ?? ''} onChange={(e) => onChange((e.target.value as NewsSourceFilterValue) || undefined)}>
+  <label className="field" htmlFor="source-select">
+    <span className="field__label">Source</span>
+    <select id="source-select" className="field__select" value={value ?? ''} onChange={(e) => onChange((e.target.value as NewsSourceFilterValue) || undefined)}>
       <option value="">All</option>
-      {SOURCES.map((s) => (
-        <option key={s} value={s}>{s}</option>
+      {SOURCES.map((source) => (
+        <option key={source} value={source}>
+          {source}
+        </option>
       ))}
     </select>
-  </div>
+  </label>
 )
 
 export default SourceFilter
