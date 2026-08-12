@@ -73,6 +73,10 @@ export const ArticleListPage: React.FC = () => {
     setQuery({ author: author.trim() || undefined, page: 1 })
   }
 
+  const onDateChange = (field: 'from' | 'to', value: string) => {
+    setQuery({ [field]: value || undefined, page: 1 })
+  }
+
   const loadMore = () => {
     setQuery({ page: (query.page ?? 1) + 1 })
   }
@@ -91,10 +95,34 @@ export const ArticleListPage: React.FC = () => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20, alignItems: 'center' }}>
-          <label>
-            <span style={{ marginRight: 8 }}>Author</span>
-            <input value={query.author ?? ''} onChange={(event) => onAuthorChange(event.target.value)} style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)' }} />
+        <div className="date-range-bar">
+          <label className="date-field">
+            <span className="date-field__label">From</span>
+            <input
+              className="date-field__input"
+              type="date"
+              value={query.from ?? ''}
+              onChange={(event) => onDateChange('from', event.target.value)}
+            />
+          </label>
+
+          <label className="date-field">
+            <span className="date-field__label">To</span>
+            <input
+              className="date-field__input"
+              type="date"
+              value={query.to ?? ''}
+              onChange={(event) => onDateChange('to', event.target.value)}
+            />
+          </label>
+
+          <label className="date-field date-field--author">
+            <span className="date-field__label">Author</span>
+            <input
+              className="date-field__input date-field__input--text"
+              value={query.author ?? ''}
+              onChange={(event) => onAuthorChange(event.target.value)}
+            />
           </label>
         </div>
 

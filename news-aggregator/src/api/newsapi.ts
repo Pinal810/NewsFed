@@ -35,6 +35,9 @@ export async function fetchNewsApiArticles(
   if (query.domains) {
     params.domains = query.domains
   }
+  if (query.author) {
+    params.author = query.author
+  }
 
   if (query.from) params.from = query.from
   if (query.to) params.to = query.to

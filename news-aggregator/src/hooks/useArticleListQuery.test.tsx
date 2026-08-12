@@ -57,6 +57,15 @@ describe('article list query helpers', () => {
     expect(params.toString()).toContain('q=artificial+intelligence')
     expect(params.get('source')).toBe('guardian')
     expect(params.get('page')).toBe('2')
+    expect(params.get('from')).toBe('2026-08-01')
+    expect(params.get('to')).toBe('2026-08-12')
+  })
+
+  it('preserves date range values in the parsed URL state', () => {
+    const parsed = parseArticleListQuery(new URLSearchParams('from=2026-08-01&to=2026-08-12'))
+
+    expect(parsed.from).toBe('2026-08-01')
+    expect(parsed.to).toBe('2026-08-12')
   })
 })
 

@@ -231,6 +231,66 @@ p {
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
+.date-range-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.date-field--author {
+  min-width: 200px;
+  flex: 1 1 180px;
+}
+
+.date-field__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-h);
+}
+
+.date-field__input {
+  width: 100%;
+  min-width: 160px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-h);
+  border-radius: 10px;
+  padding: 0.72rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.date-field__input--text {
+  min-width: 180px;
+}
+
+.date-field__input:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.date-field__input:focus {
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  outline: none;
+}
+
+.date-field__input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+}
+
 .search-form {
   display: flex;
   flex-wrap: wrap;
