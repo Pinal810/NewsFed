@@ -117,7 +117,7 @@ export const ArticlePage: React.FC = () => {
             </div>
 
             <div className="detail-actions">
-              <Link className="secondary-button" to="/" style={{ width: 'auto' }}>
+              <Link className="secondary-button" to="/" style={{ width: '50%' }}>
                 Back to news
               </Link>
               {article.url ? (

@@ -148,7 +148,7 @@ export const ArticleListPage: React.FC = () => {
             <input
               className="date-field__input date-field__input--text"
               value={query.author ?? ''}
-              placeholder="author name"
+              placeholder="Author name"
               onChange={(event) => onAuthorChange(event.target.value)}
             />
           </label>

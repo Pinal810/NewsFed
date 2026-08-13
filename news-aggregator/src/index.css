@@ -550,7 +550,7 @@ p {
 }
 
 .detail-shell {
-  width: min(860px, calc(100% - 24px));
+  width: min(1116px, calc(100% - 24px));
   margin: 20px auto;
 }
 
@@ -625,7 +625,6 @@ p {
 .detail-actions {
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
   margin-top: 18px;
 }
 
