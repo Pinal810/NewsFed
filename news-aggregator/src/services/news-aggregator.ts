@@ -4,12 +4,10 @@ import { providerNameFromSource, type NewsQuery } from '../types/news-query'
 import type { NewsProvider } from './news-provider'
 import { createNewsApiProvider } from './providers/newsapi-provider'
 import { createGuardianProvider } from './providers/guardian-provider'
-import { createNewYorkTimesProvider } from './providers/nyt-provider'
 
 export type AggregatorOptions = {
   newsApiKey: string
   guardianKey: string
-  nytKey: string
 }
 
 export type ProviderError = {
@@ -82,7 +80,6 @@ export const createNewsAggregatorService = (options: AggregatorOptions) => {
   const providers: NewsProvider[] = [
     createNewsApiProvider(options.newsApiKey),
     createGuardianProvider(options.guardianKey),
-    createNewYorkTimesProvider(options.nytKey),
   ]
 
   const fetchAll = async (query: NewsQuery, signal?: AbortSignal): Promise<{ articles: Article[]; errors: ProviderError[] }> => {

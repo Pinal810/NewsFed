@@ -2,7 +2,7 @@ import type { ArticleCategory } from './article-category'
 import type { NewsProviderName } from './news-provider-name'
 
 export type ArticleSort = 'newest' | 'oldest' | 'relevance'
-export type NewsSourceFilterValue = 'newsapi' | 'guardian' | 'nyt'
+export type NewsSourceFilterValue = 'newsapi' | 'guardian'
 
 export type NewsQuery = {
   q?: string
@@ -31,7 +31,6 @@ export function normalizeSourceValue(value?: string): NewsSourceFilterValue | un
 
   if (normalized === 'guardian' || normalized === 'theguardian') return 'guardian'
   if (normalized === 'newsapi') return 'newsapi'
-  if (normalized === 'nyt' || normalized === 'newyorktimes' || normalized === 'new york times') return 'nyt'
 
   return undefined
 }
@@ -42,7 +41,6 @@ export function providerNameFromSource(source?: NewsSourceFilterValue | NewsProv
 
   if (normalized === 'newsapi') return 'newsapi'
   if (normalized === 'guardian') return 'theguardian'
-  if (normalized === 'nyt') return 'nyt'
 
   return undefined
 }

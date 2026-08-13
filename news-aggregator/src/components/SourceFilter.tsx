@@ -3,7 +3,7 @@ import type { NewsSourceFilterValue } from '../types/news-query'
 
 type Props = { value?: NewsSourceFilterValue; onChange: (v?: NewsSourceFilterValue) => void }
 
-const SOURCES: NewsSourceFilterValue[] = ['newsapi', 'guardian', 'nyt']
+const SOURCES: NewsSourceFilterValue[] = ['newsapi', 'guardian']
 
 export const SourceFilter: React.FC<Props> = ({ value, onChange }) => (
   <label className="field" htmlFor="source-select">

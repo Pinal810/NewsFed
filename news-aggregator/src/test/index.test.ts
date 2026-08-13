@@ -21,14 +21,6 @@ describe('aggregator helpers', () => {
         source: { id: 'other', name: 'Other', provider: 'theguardian' },
         provider: 'theguardian',
       },
-      {
-        id: 'c-3',
-        title: 'Different Headline',
-        url: 'https://example.org/other',
-        publishedAt: '2026-08-13T00:00:00.000Z',
-        source: { id: 'example', name: 'Example', provider: 'nyt' },
-        provider: 'nyt',
-      },
     ]
 
     expect(deduplicateArticles(articles)).toHaveLength(2)

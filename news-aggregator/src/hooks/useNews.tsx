@@ -28,8 +28,7 @@ export function useNews(query: NewsQuery) {
   const service = useMemo(() => {
     const newsApiKey = import.meta.env.VITE_NEWSAPI_KEY ?? ''
     const guardianKey = import.meta.env.VITE_GUARDIAN_KEY ?? ''
-    const nytKey = import.meta.env.VITE_NYT_KEY ?? ''
-    return createNewsAggregatorService({ newsApiKey, guardianKey, nytKey })
+    return createNewsAggregatorService({ newsApiKey, guardianKey })
   }, [])
 
   const fetch = useCallback(async () => {

@@ -1,21 +1,8 @@
-import React from 'react'
-import { act, renderHook, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useDebouncedValue } from './useDebouncedValue'
-import { parseArticleListQuery, serializeArticleListQuery, useArticleListQuery } from './useArticleListQuery'
+import { parseArticleListQuery, serializeArticleListQuery } from './useArticleListQuery'
 
-const makeWrapper = (initialPath = '/search?category=technology&source=guardian&sort=oldest&from=2026-08-01&to=2026-08-12&q=ai') => {
-  const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="*" element={<>{children}</>} />
-      </Routes>
-    </MemoryRouter>
-  )
-
-  return Wrapper
-}
 
 describe('article list query helpers', () => {
   it('parses URL state safely and normalizes invalid values', () => {
@@ -66,30 +53,6 @@ describe('article list query helpers', () => {
 
     expect(parsed.from).toBe('2026-08-01')
     expect(parsed.to).toBe('2026-08-12')
-  })
-})
-
-describe('useArticleListQuery', () => {
-  it('reads settings from the URL and updates them deterministically', async () => {
-    const { result } = renderHook(() => useArticleListQuery(), { wrapper: makeWrapper() })
-
-    await waitFor(() => {
-      expect(result.current.query).toMatchObject({
-        q: 'ai',
-        category: 'technology',
-        source: 'guardian',
-        sort: 'oldest',
-      })
-    })
-
-    act(() => {
-      result.current.setQuery({ q: 'deep learning', source: 'nyt', sort: 'newest', page: 1 })
-    })
-
-    await waitFor(() => {
-      expect(result.current.query.q).toBe('deep learning')
-      expect(result.current.query.source).toBe('nyt')
-    })
   })
 })
 

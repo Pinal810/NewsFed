@@ -1,6 +1,6 @@
 import type { NewsProviderName } from '../types/news-provider-name'
 
-export const AVAILABLE_PROVIDERS: NewsProviderName[] = ['newsapi', 'theguardian', 'nyt']
+export const AVAILABLE_PROVIDERS: NewsProviderName[] = ['newsapi', 'theguardian']
 
 export type ProviderConfig = {
   name: NewsProviderName

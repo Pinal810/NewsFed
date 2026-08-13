@@ -1,1 +1,1 @@
-export type NewsProviderName = 'newsapi' | 'theguardian' | 'nyt'
+export type NewsProviderName = 'newsapi' | 'theguardian'

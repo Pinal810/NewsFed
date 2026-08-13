@@ -29,7 +29,7 @@ export async function fetchNewsApiArticles(
 
 //   const sourceValue = query.sources ?? query.sourceId ?? query.source
 //   if (sourceValue) {
-//     params.sources = sourceValue
+    params.sources = 'bbc-news'
 //   }
 
   if (query.domains) {

@@ -3,7 +3,7 @@ import { DEFAULT_USER_PREFERENCES } from '../domain/preferences/user-preferences
 import type { ArticleCategory } from '../types/article-category'
 import type { UserPreferences } from '../domain/preferences/user-preferences'
 
-const AVAILABLE_SOURCES = ['newsapi', 'guardian', 'nyt']
+const AVAILABLE_SOURCES = ['newsapi', 'guardian']
 const ALL_CATEGORIES: ArticleCategory[] = ['general', 'business', 'entertainment', 'health', 'science', 'sports', 'technology', 'world', 'politics', 'other']
 
 type Props = {
@@ -56,7 +56,7 @@ export const PreferencesPanel: React.FC<Props> = ({ preferences, availableAuthor
             {AVAILABLE_SOURCES.map((source) => (
               <label key={source} className="preference-option">
                 <input type="checkbox" checked={draft.sources.includes(source)} onChange={() => toggleValue('sources', source)} />
-                <span>{source === 'guardian' ? 'Guardian' : source === 'newsapi' ? 'NewsAPI' : 'NYT'}</span>
+                <span>{source === 'guardian' ? 'Guardian' : 'NewsAPI'}</span>
               </label>
             ))}
           </div>

@@ -71,9 +71,12 @@ export const ArticlePage: React.FC = () => {
     )
   }
 
-  const description = article.description?.trim() || article.content?.trim() || 'No additional description available.'
+  const fullContent = article.content?.trim() || article.description?.trim() || 'No content available.'
   const sourceName = article.source?.name?.trim() || article.source?.id || 'Source'
   const category = article.category ? article.category : undefined
+
+  // Split content by double newlines to create paragraphs, or by single newlines
+  const contentParagraphs = fullContent.split(/\n\s*\n/).filter(p => p.trim())
 
   return (
     <div>
@@ -102,7 +105,15 @@ export const ArticlePage: React.FC = () => {
             </div>
 
             <div className="detail-article__body">
-              <p>{description}</p>
+              {fullContent.includes('<') ? (
+                <div dangerouslySetInnerHTML={{ __html: fullContent }} />
+              ) : contentParagraphs.length > 1 ? (
+                contentParagraphs.map((paragraph, index) => (
+                  <p key={index}>{paragraph.trim()}</p>
+                ))
+              ) : (
+                <p>{fullContent}</p>
+              )}
             </div>
 
             <div className="detail-actions">

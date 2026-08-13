@@ -17,10 +17,23 @@ import { buildArticleIdentifier } from '../domain/models/article'
 import type { ArticleCategory } from '../types/article-category'
 import type { ArticleSort, NewsSourceFilterValue } from '../types/news-query'
 
+const getToday = () => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+}
+
 export const ArticleListPage: React.FC = () => {
   const { query, setQuery, navigateToCategory, location } = useArticleListQuery()
   const [searchInput, setSearchInput] = useState(query.q ?? '')
   const debouncedSearch = useDebouncedValue(searchInput, 400)
+
+  // Initialize from and to dates to today if not set
+  React.useEffect(() => {
+    if (!query.from && !query.to) {
+      const today = getToday()
+      setQuery({ from: today, to: today })
+    }
+  }, [])
 
   const effectiveQuery = useMemo(() => ({ ...query, q: debouncedSearch }), [query, debouncedSearch])
   const { articles, loading } = useNews(effectiveQuery)
@@ -49,7 +62,6 @@ export const ArticleListPage: React.FC = () => {
     if (location.pathname === '/search') {
       return 'Search Results'
     }
-    return 'Latest News'
   }, [location.pathname, query.category])
 
   const onCategoryChange = (category?: ArticleCategory) => {
@@ -75,6 +87,21 @@ export const ArticleListPage: React.FC = () => {
 
   const onDateChange = (field: 'from' | 'to', value: string) => {
     setQuery({ [field]: value || undefined, page: 1 })
+  }
+
+  const resetFilters = () => {
+    const today = getToday()
+    setQuery({ 
+      q: undefined, 
+      category: undefined, 
+      source: undefined, 
+      sort: undefined,
+      author: undefined,
+      from: today,
+      to: today,
+      page: 1 
+    })
+    setSearchInput('')
   }
 
   const loadMore = () => {
@@ -121,9 +148,13 @@ export const ArticleListPage: React.FC = () => {
             <input
               className="date-field__input date-field__input--text"
               value={query.author ?? ''}
+              placeholder="author name"
               onChange={(event) => onAuthorChange(event.target.value)}
             />
           </label>
+           <button onClick={resetFilters} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', cursor: 'pointer', fontSize: 14, fontWeight: 500, minHeight: 44 }}>
+              Reset Filters
+            </button>
         </div>
 
         {/* <PreferencesPanel preferences={preferences} availableAuthors={authorOptions} onSave={savePreferences} onReset={resetPreferences} /> */}
